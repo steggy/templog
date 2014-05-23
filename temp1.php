@@ -4,15 +4,6 @@
 //This set file required for this to run. place in same directory as script 
 //require_once 'tempset.php';
 
-
-
-fclose(STDIN);
-fclose(STDOUT);
-fclose(STDERR);
-$STDIN = fopen('/dev/null', 'r');
-$STDOUT = fopen('/var/log/templogger.log', 'wb');
-$STDERR = fopen('/var/log/templogerror.log', 'wb');
-
 global $temperature;
 global $dbusername;
 global $dbpassword;
@@ -111,6 +102,13 @@ $GLOBALS['temperature'] = substr($matches[1],strpos($matches[1],"t=") +2) / 1000
 //'*******************************************************************************
 function maindaemon()
 {
+fclose(STDIN);
+fclose(STDOUT);
+fclose(STDERR);
+$STDIN = fopen('/dev/null', 'r');
+$STDOUT = fopen('/var/log/templogger.log', 'wb');
+$STDERR = fopen('/var/log/templogerror.log', 'wb');
+
 //fork the process to work in a daemonized environment
 file_put_contents($log, "Status: starting up. \n", FILE_APPEND);
 $pid = pcntl_fork();
