@@ -14,6 +14,7 @@ global $samprate;
 global $unitname;
 global $revmajor;
 global $revminor;
+global $ini_array;
 $GLOBALS['revmajor']="1";
 $GLOBALS['revminor']="1";
 readini("/var/www/tempset.ini");
@@ -83,7 +84,7 @@ if(isset($argv[1]))
 
 function gettemp()
 {
-if (!defined("THERMOMETER_SENSOR_PATH")) define("THERMOMETER_SENSOR_PATH", "/sys/bus/w1/devices/" .$GLOBALS['sname'] ."/w1_slave"); 
+if (!defined("THERMOMETER_SENSOR_PATH")) define("THERMOMETER_SENSOR_PATH", "/sys/bus/w1/devices/" .$GLOBALS['ini_array']['sensor']['name'] ."/w1_slave"); 
 // Open resource file for thermometer
 $thermometer = fopen(THERMOMETER_SENSOR_PATH, "r"); 
 // Get the contents of the resource
@@ -133,7 +134,7 @@ while(true)
 	fclose($noteit);
 	echo $tf;
 	recordtemp($GLOBALS['temperature']);
-	sleep($GLOBALS['samprate']);
+	sleep($GLOBALS['ini_array']['sensor']['sample_rate']);
 }
 } //end of fork
 }
@@ -155,7 +156,7 @@ while(true)
 	fclose($noteit);
 	echo $tf;
 	recordtemp($GLOBALS['temperature']);
-	sleep($GLOBALS['samprate']);
+	sleep($GLOBALS['ini_array']['sensor']['sample_rate']);
 }
 
 }
@@ -185,16 +186,16 @@ runsql($query);
 //'*******************************************************************************
 function readini($file)
 {
-$ini_array = parse_ini_file($file,true);
+$GLOBALS['ini_array'] = parse_ini_file($file,true);
 
 
 
-$GLOBALS['dbusername'] = $ini_array['database']['dbusername'];
+/*$GLOBALS['dbusername'] = $ini_array['database']['dbusername'];
 $GLOBALS['dbpassword'] = $ini_array['database']['dbpassword'];
 $GLOBALS['database'] = $ini_array['database']['database'];
 $GLOBALS['dbhost'] = $ini_array['database']['dbhost'];
 $GLOBALS['sname'] = $ini_array['sensor']['name'];
-$GLOBALS['samprate'] = $ini_array['sensor']['sample_rate'];
+$GLOBALS['samprate'] = $ini_array['sensor']['sample_rate'];*/
 }
 //'*******************************************************************************
 
@@ -202,10 +203,10 @@ $GLOBALS['samprate'] = $ini_array['sensor']['sample_rate'];
 //'*********************************************************************************************
 function QueryIntoArray($query){
         settype($retval,"array");
-$username = $GLOBALS['dbusername'];
-$password = $GLOBALS['dbpassword'];
-$database = $GLOBALS['database'];
-$host = $GLOBALS['dbhost'];
+$username = $GLOBALS['ini_array']['database']['user_name'];
+$password = $GLOBALS['ini_array']['database']['passwd'];
+$database = $GLOBALS['ini_array']['database']['db'];
+$host = $GLOBALS['ini_array']['database']['dbhost'];
 
 $connection = mysql_connect($host,$username,$password);
 continue;
@@ -237,10 +238,10 @@ return $retval;
 //'*********************************************************************************************
 function runsql($query){
 settype($retval,"array");
-$username = $GLOBALS['dbusername'];
-$password = $GLOBALS['dbpassword'];
-$database = $GLOBALS['database'];
-$host = $GLOBALS['dbhost'];
+$username = $GLOBALS['ini_array']['database']['user_name'];
+$password = $GLOBALS['ini_array']['database']['passwd'];
+$database = $GLOBALS['ini_array']['database']['db'];
+$host = $GLOBALS['ini_array']['database']['dbhost'];
 try{
 $connection = mysql_connect($host,$username,$password);
 }catch(Exception $e) {
@@ -261,13 +262,12 @@ mysql_query($query);// or die( "Query failed in RunSql " .mysql_error());
 function showusage()
 {
 	echo "temp1.php Rev ". $GLOBALS['revmajor'] ."." .$GLOBALS['revminor'] ."\n";
-	echo "Usage: clisprink.php [option]...\n Using the Raspberry pi as a sprinkler controller\n";
+	echo "Usage: temp1.php [option]...\n Using the beaglebone black as a temp logger\n";
+	echo "\t this is usualy run from tempd in daemon mode\n";
 	echo "Mandatory arguments\n";
 	echo "  -h, \t This help\n";
 	echo "  -r, \t Used for debuging from console\n";
 	echo "  -D, \t Daemon mode usualy called from temp1d\n";
-		
-	
 	echo "\n\n";
 }
 //'*******************************************************************************
