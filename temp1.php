@@ -21,9 +21,11 @@ global $dbhost;
 global $sname;
 global $samprate;
 global $unitname;
-
+global $revmajor;
+global $revminor;
+$GLOBALS['revmajor']="1";
+$GLOBALS['revminor']="1";
 readini("/var/www/tempset.ini");
-
 //used for RPI
 /*try
 {
@@ -40,6 +42,53 @@ readini("/var/www/tempset.ini");
 
 $GLOBALS['unitname'] = preg_replace("/\r|\n/", "", shell_exec("/bin/hostname"));
 $log = '/var/log/templogger.log';
+
+if(isset($argv[1]))
+{
+	switch($argv[1])
+	{
+		case '-x':
+			changecolor(0,0,0);		
+			exit;
+			break;
+		case '-s':
+			if(sizeof($argv) >= 6)
+			{
+				strobe($argv[2],$argv[3],$argv[4],$argv[5],$argv[6]);
+				//changecolor(0,0,0);		
+				die;
+			}else{
+				showusage();
+				die;
+			}
+			break;
+		case '-r':
+			main();	
+			break;
+		case '-c':
+			if(sizeof($argv) >= 4)
+			{
+				changecolor($argv[2],$argv[3],$argv[4]);
+			}else{
+				showusage();
+				die;
+			}
+			break;
+		case '-D':
+			//daemon mode
+			maindaemon();
+			break;
+		default;
+			showusage();
+			die;
+
+	}
+
+	
+}else{
+	showusage();
+	die;
+}
 
 function gettemp()
 {
@@ -59,8 +108,9 @@ $matches = explode("\n",$thermometerReadings);
 $GLOBALS['temperature'] = substr($matches[1],strpos($matches[1],"t=") +2) / 1000;
 }
 
-
-
+//'*******************************************************************************
+function maindaemon()
+{
 //fork the process to work in a daemonized environment
 file_put_contents($log, "Status: starting up. \n", FILE_APPEND);
 $pid = pcntl_fork();
@@ -88,6 +138,30 @@ while(true)
 	sleep($GLOBALS['samprate']);
 }
 } //end of fork
+}
+//'*******************************************************************************
+
+//'*******************************************************************************
+function main()
+{
+
+//the main process
+while(true)
+{
+	gettemp();
+	$tf = date('Ymd H:i:s') ."\t" .$GLOBALS['unitname'] ."\t" .$GLOBALS['temperature'];
+	$tf .= "\t" .round($GLOBALS['temperature'] * 9.0 / 5.0 + 32.0,2) ."\n";
+	$noteit = fopen("/root/bin/mytemp","a");
+	//echo fwrite($noteit,$tf."\n");
+	fwrite($noteit,$tf."\n");
+	fclose($noteit);
+	echo $tf;
+	recordtemp($GLOBALS['temperature']);
+	sleep($GLOBALS['samprate']);
+}
+
+}
+//'*******************************************************************************
 
 //'*******************************************************************************
 function recordtemp($tmp)
@@ -183,5 +257,22 @@ mysql_query($query);// or die( "Query failed in RunSql " .mysql_error());
         
 }//end function
 //'*********************************************************************************************
+
+
+//'*******************************************************************************
+function showusage()
+{
+	echo "temp1.php Rev ". $GLOBALS['revmajor'] ."." .$GLOBALS['revminor'] ."\n";
+	echo "Usage: clisprink.php [option]...\n Using the Raspberry pi as a sprinkler controller\n";
+	echo "Mandatory arguments\n";
+	echo "  -h, \t This help\n";
+	echo "  -r, \t Used for debuging from console\n";
+	echo "  -D, \t Daemon mode usualy called from temp1d\n";
+		
+	
+	echo "\n\n";
+}
+//'*******************************************************************************
+
 
 ?>

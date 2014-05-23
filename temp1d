@@ -3,7 +3,7 @@
 DAEMON="/root/bin/templogger/temp1.php"
 DAEMONUSER="root"
 DEAMON_NAME="temp1.php"
-
+OPTIONS="-D"
 PATH="/sbin:/bin:/usr/sbin:/usr/bin"
 
 test -x $DAEMON || exit 0
@@ -12,7 +12,7 @@ test -x $DAEMON || exit 0
 
 d_start () {
         log_daemon_msg "Starting system $DEAMON_NAME Daemon"
-        start-stop-daemon --background --name $DEAMON_NAME --start --user $DAEMONUSER --exec $DAEMON
+        start-stop-daemon --background --name $DEAMON_NAME --start --user $DAEMONUSER --exec $DAEMON -- $OPTIONS
         log_end_msg $?
 }
 
