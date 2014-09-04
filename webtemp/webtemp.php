@@ -4,16 +4,17 @@ global $ini_array;
 global $temperature;
 
 
-$GLOBALS['inifile'] = '/var/www/tempset.ini';
+$GLOBALS['inifile'] = '/var/www/webtemp/tempset.ini';
 readini($GLOBALS['inifile']);
 gettemp();
 
 if(isset($_POST['w']))
 {
-	switch(strtolower($_POST['w']))
+	
+    switch(strtolower($_POST['w']))
 	{
 		case "update":
-			//update();
+			update();
 			first();
 			break;
 	}
@@ -32,22 +33,59 @@ function first()
 ?>
 <html>
 <head>
-	<title></title>
-	<link rel="stylesheet" type="text/css" href="temp.css" />
+	<title>Tempeture</title>
+    <style>
+        body {
+        font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+        /*font-size: 62.5%;*/
+        background-color:#FBF7C2;
+        }
+
+        #info
+        {
+        position:fixed;
+        top:63px;
+        left:33px;
+        width: 330px;
+        height: 400px;
+        /*display:none;*/
+        background-color:cyan;
+        border: 1px solid #5C755E;
+        border-radius: 6px;
+        box-shadow: 5px 5px 3px #888;
+        font-size:20px;
+        }
+        input[type=submit] 
+        {
+        border: 1px solid #5C755E;
+        border-radius: 6px;
+        box-shadow: 5px 5px 3px #888;
+        }
+
+        button
+        {
+        border: 1px solid #5C755E;
+        border-radius: 6px;
+        box-shadow: 5px 5px 3px #888;
+        font-size:20px;
+        }
+        
+        </style>
 </head>
 <body>
-hello
+
 <div id=info>
-	<br>
-	Unit name: <?=$GLOBALS['ini_array']['unit']['unitname']?>
-	<br>
-	Current Temp C: <?=$GLOBALS['temperature']?>
-	<br>
-	Sample Rate Sec.: <input size=2 name=rate value="<?=$GLOBALS['ini_array']['sensor']['sample_rate']?>">
-	<br>
-	Sensor Name: <input size=8 name=rate value="<?=$GLOBALS['ini_array']['sensor']['name']?>">
-	<br>
-	<input type=submit value="UPDATE">
+	<form action="<?=$_SERVER['REQUEST_URI'];?>" method="post">
+    <table>
+       <tr><td>Unit name:</td><td><?=$GLOBALS['ini_array']['unit']['unitname'];?></td></tr>
+	   <tr><td>Current Temp C:</td><td><?=$GLOBALS['temperature'];?></td></tr>
+	   <tr><td>Sample Rate Sec.: </td><td><input size=2 name="rate" value="<?=$GLOBALS['ini_array']['sensor']['sample_rate'];?>"></td></tr>
+	   <tr><td>Sensor Name: </td><td><input size=8 name="sensor" value="<?=$GLOBALS['ini_array']['sensor']['name'];?>"></td></tr>
+       <tr><td>Server: </td><td><input size=8 name="server" value="<?=$GLOBALS['ini_array']['database']['dbhost'];?>"></td></tr>
+	<tr><td colspan=3><input name="w" type=submit value="UPDATE"></form></td></tr>
+</table>
+    <br>
+    Last Updated <?= date ("m-d-Y H:i:s.", filemtime($GLOBALS['inifile']));?>
 </div>
 </body>
 </html>
@@ -75,6 +113,22 @@ $GLOBALS['samprate'] = $ini_array['sensor']['sample_rate'];*/
 }
 //###############################################################################
 ?>
+
+<?
+//##########################################################################
+function update()
+{
+$GLOBALS['ini_array'] = parse_ini_file($GLOBALS['inifile'],true);
+
+$GLOBALS['ini_array']['sensor']['sample_rate'] = $_POST['rate'];
+$GLOBALS['ini_array']['sensor']['name'] = $_POST['sensor'];
+$GLOBALS['ini_array']['database']['dbhost'] = $_POST['server'];
+
+write_ini_file($GLOBALS['ini_array'], $GLOBALS['inifile']);
+}
+//###############################################################################
+?>
+
 
 <?
 //'*******************************************************************************

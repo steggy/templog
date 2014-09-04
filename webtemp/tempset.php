@@ -15,7 +15,7 @@ $database="templogger";
 $dbhost = "10.3.101.219";
 
 //Temp sensor name
-$sname = '28-00000574cbe8';
+$sname = '28-00000574816d';
 
 //Sample rate in seconds
 $samprate = 300;

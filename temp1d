@@ -1,10 +1,10 @@
 #!/bin/sh -e
 
-DAEMON="/root/bin/templogger/temp1.php"
+DAEMON="/root/bin/templog/temp1.php"
 DAEMONUSER="root"
 DEAMON_NAME="temp1.php"
 OPTIONS="-D"
-PATH="/sbin:/bin:/usr/sbin:/usr/bin"
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/root/bin/templog"
 
 test -x $DAEMON || exit 0
 

@@ -17,7 +17,7 @@ global $revminor;
 global $ini_array;
 $GLOBALS['revmajor']="1";
 $GLOBALS['revminor']="1";
-readini("/var/www/tempset.ini");
+readini("/var/www/webtemp/tempset.ini");
 //used for RPI
 /*try
 {
@@ -111,10 +111,10 @@ $STDOUT = fopen('/var/log/templogger.log', 'wb');
 $STDERR = fopen('/var/log/templogerror.log', 'wb');
 
 //fork the process to work in a daemonized environment
-file_put_contents($log, "Status: starting up. \n", FILE_APPEND);
+file_put_contents($GLOBALS['log'], "Status: starting up. \n", FILE_APPEND);
 $pid = pcntl_fork();
 if($pid == -1){
-	file_put_contents($log, "Error: could not daemonize process.n", FILE_APPEND);
+	file_put_contents($GLOBALS['log'], "Error: could not daemonize process.n", FILE_APPEND);
 	return 1; //error
 }
 else if($pid){
@@ -165,20 +165,37 @@ while(true)
 //'*******************************************************************************
 function recordtemp($tmp)
 {
+$ip = getip();
 //echo "In record\n";
 $tf=round($tmp * 9.0 / 5.0 + 32.0,2);
-$query = "insert into tlog (c,f,ldte,unit) values ('" .$tmp ."','" .$tf ."','" .date('Y-m-d H:i:s') ."','" .$GLOBALS['unitname'] ."')";
+$query = "insert into tlog (ip,c,f,ldte,unit) values ('" .$ip ."','" .$tmp ."','" .$tf ."','" .date('Y-m-d H:i:s') ."','" .$GLOBALS['unitname'] ."')";
 //echo $query;
 try{
 //echo $query ."\n";
 runsql($query);
 //echo "made it\n";
 }catch(Exception $e) {
-	$STDERR = fopen('/var/log/templogerror.log', 'wb');
-	fwrite($STDERR,'Caught exception: ',  $e->getMessage(), "\n");
-	//echo "Caught exception: ",  $e->getMessage(), "\n";
-	fclose($STDERR);
+	//$STDERR = fopen('/var/log/templogerror.log', 'wb');
+	//fwrite($STDERR,'Caught exception: ',  $e->getMessage(), "\n");
+	echo "Caught exception: ",  $e->getMessage(), "\n";
+	//fclose($STDERR);
 	continue;
+}
+}
+//'*******************************************************************************
+
+
+//'*******************************************************************************
+function getip()
+{
+$hostsipaddress = str_replace("\n","",shell_exec("ifconfig wlan0 | grep 'inet addr' | awk -F':' {'print $2'} | awk -F' ' {'print $1'} 2>&1"));
+
+if ($hostsipaddress != "") {
+	//echo "\n" .$hostsipaddress ."\n";
+	return $hostsipaddress;
+}else{
+	//echo "N/A\n";
+	return "N/A";
 }
 }
 //'*******************************************************************************
@@ -228,6 +245,7 @@ $result= mysql_query($query);
 			}
                 }//end inner loop
         }//end outer loop
+mysql_close($connection);
 return $retval;
 }//end function
 //'*********************************************************************************************
@@ -253,7 +271,7 @@ $connection = mysql_connect($host,$username,$password);
 }
 @mysql_select_db($database); //or die( "Unable to select database");
 mysql_query($query);// or die( "Query failed in RunSql " .mysql_error());
-        
+mysql_close($connection);
 }//end function
 //'*********************************************************************************************
 
