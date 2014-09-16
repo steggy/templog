@@ -1,3 +1,12 @@
 Steggy 28 Aug 2014
 
 Must have a softlink in /var/www for the local file tempset.ini 
+
+setup temp logger
+remeber to install php5 for apache
+We are linking the webpage from a user directory because root will not follow symlinks
+create the directory bin in a users home directory
+clone the templog from git into the bin directory
+Add this user to www-data group /etc/group
+create link in the root/bin directory ln -s /home/[user]/bin/templog/ templog 
+create link in /var/www ln -s /home/[user]/bin/templog/webtemp/ webtemp

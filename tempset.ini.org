@@ -1,0 +1,16 @@
+;Beaglebone black temp sensor
+;Steggy
+
+[database]
+user_name="templog"
+passwd="templog123"
+db="templogger"
+dbhost = "10.3.101.240"
+
+[sensor]
+name = '28-00000574816d'
+;in seconds
+sample_rate =300
+
+[unit]
+unitname = "bbb-ubuntu12-02"
