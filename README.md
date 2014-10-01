@@ -45,4 +45,4 @@ create link in /var/www ln -s /home/[user]/bin/templog/webtemp/ webtemp
 
 I run temp1d from /etc/init.d  - please read the top of temp1.php to make sure directories are correct
 
-to view the local status got http://[bbb ip]/webtemp/webtemp.php 
+to view the local status go to http://[bbb ip]/webtemp/webtemp.php 
